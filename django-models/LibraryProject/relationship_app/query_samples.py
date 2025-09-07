@@ -33,21 +33,13 @@ def get_books_in_library(library_name):
         return f"No library named {library_name} found."
 
 
+
 # Query 3: The librarian for a library
 def get_librarian_for_library(library_name):
     try:
         library = Library.objects.get(name=library_name)
-
-        # Version 1 (explicit filter)
-        librarian_v1 = Librarian.objects.filter(library=library).first()
-
-        # Version 2 (OneToOne direct access)
-        librarian_v2 = library.librarian
-
-        if librarian_v1:
-            return librarian_v1.name
-        else:
-            return f"No librarian assigned to {library_name}."
+        librarian = Librarian.objects.get(library=library)  # ✅ required form
+        return librarian.name
     except Library.DoesNotExist:
         return f"No library named {library_name} found."
     except Librarian.DoesNotExist:
