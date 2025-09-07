@@ -1,0 +1,354 @@
+<!-- member_view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Portal - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .header .role-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 5px solid #007bff;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .book-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .book-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .book-author {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .book-year {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .library-browser {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .library-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .library-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .library-info {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .view-library-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .view-library-btn:hover {
+            background-color: #0056b3;
+        }
+        .book-search {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .member-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .member-actions a {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .member-actions a:hover {
+            background-color: #0056b3;
+        }
+        .member-actions a.secondary {
+            background-color: #6c757d;
+        }
+        .member-actions a.secondary:hover {
+            background-color: #545b62;
+        }
+        .navigation {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #dee2e6;
+        }
+        .navigation a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .navigation a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .book-item-small {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+            font-size: 0.9em;
+        }
+        .alert {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📖 Member Portal</h1>
+        <div class="role-badge">Member Access</div>
+        <p>Welcome, {{ user.username }}! Discover your next great read.</p>
+    </div>
+
+    <!-- Welcome Statistics -->
+    <div class="welcome-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_books }}</div>
+            <div class="stat-label">Books Available</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_libraries }}</div>
+            <div class="stat-label">Libraries</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ recommended_books|length }}</div>
+            <div class="stat-label">Recommendations</div>
+        </div>
+    </div>
+
+    <!-- Book Recommendations -->
+    <div class="section">
+        <h2>📚 Recommended for You</h2>
+        {% if recommended_books %}
+            <div class="recommendations">
+                {% for book in recommended_books %}
+                    <div class="book-card">
+                        <div class="book-title">{{ book.title }}</div>
+                        <div class="book-author">by {{ book.author.name }}</div>
+                        {% if book.publication_year %}
+                            <div class="book-year">Published {{ book.publication_year }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert">
+                <strong>Welcome!</strong> As you browse our collection, we'll start recommending books based on your interests.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Library Browser -->
+    <div class="section">
+        <h2>🏛️ Browse Libraries</h2>
+        {% if all_libraries %}
+            <div class="library-browser">
+                {% for library in all_libraries %}
+                    <div class="library-card">
+                        <div class="library-name">{{ library.name }}</div>
+                        <div class="library-info">
+                            📚 {{ library.books.count }} books available
+                        </div>
+                        <a href="{% url 'relationship_app:library_detail' library.pk %}" class="view-library-btn">
+                            Browse Collection
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert">No libraries are currently available.</div>
+        {% endif %}
+    </div>
+
+    <!-- Book Collection Browser -->
+    <div class="section">
+        <h2>📖 All Books</h2>
+        
+        <!-- Simple Search Box (Note: This is just UI, no backend functionality) -->
+        <div class="book-search">
+            <input type="text" class="search-input" placeholder="🔍 Search books by title or author..." onkeyup="filterBooks(this.value)">
+        </div>
+        
+        {% if all_books %}
+            <div class="book-list" id="bookList">
+                {% for book in all_books %}
+                    <div class="book-item-small book-searchable" data-title="{{ book.title|lower }}" data-author="{{ book.author.name|lower }}">
+                        <div style="font-weight: bold; color: #333;">{{ book.title }}</div>
+                        <div style="color: #666; font-size: 0.85em;">{{ book.author.name }}</div>
+                        {% if book.publication_year %}
+                            <div style="color: #999; font-size: 0.8em;">{{ book.publication_year }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert">No books are currently available in our collection.</div>
+        {% endif %}
+    </div>
+
+    <!-- Member Actions -->
+    <div class="section">
+        <h2>🎯 Quick Actions</h2>
+        <div class="member-actions">
+            <a href="{% url 'relationship_app:list_books' %}">Browse All Books</a>
+            <a href="{% url 'relationship_app:library_list' %}">View All Libraries</a>
+            <a href="{% url 'relationship_app:check_role' %}" class="secondary">My Profile</a>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <a href="{% url 'relationship_app:list_books' %}">View Books</a>
+        <a href="{% url 'relationship_app:library_list' %}">View Libraries</a>
+        <a href="{% url 'relationship_app:logout' %}">Logout</a>
+    </div>
+
+    <!-- Simple JavaScript for book search filtering -->
+    <script>
+        function filterBooks(searchTerm) {
+            const books = document.querySelectorAll('.book-searchable');
+            const searchLower = searchTerm.toLowerCase();
+            
+            books.forEach(book => {
+                const title = book.getAttribute('data-title');
+                const author = book.getAttribute('data-author');
+                
+                if (title.includes(searchLower) || author.includes(searchLower)) {
+                    book.style.display = 'block';
+                } else {
+                    book.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
