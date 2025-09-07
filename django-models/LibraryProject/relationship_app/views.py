@@ -1,19 +1,17 @@
-# relationship_app/views.py - Add these role-based views to your existing views.py
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, permission_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
-from .models import Book, Library, UserProfile
+from .models import Book, Library, UserProfile, Author
 
-# Your existing views (keep all of these)...
+# Keep all your existing views here...
 
 def list_books(request):
     """Function-based view that displays all books in the database."""
@@ -76,11 +74,7 @@ class CustomLogoutView(LogoutView):
     """Custom logout view using Django's built-in LogoutView."""
     template_name = 'relationship_app/logout.html'
 
-# ============================================
-# NEW: ROLE-BASED ACCESS CONTROL VIEWS
-# ============================================
-
-# Helper functions to check user roles
+# Role-based access control helper functions
 def is_admin(user):
     """Check if user has Admin role."""
     if not user.is_authenticated:
@@ -108,22 +102,18 @@ def is_member(user):
     except UserProfile.DoesNotExist:
         return False
 
-# Role-based views using @user_passes_test decorator
-
+# Role-based views (keep your existing ones)
 @user_passes_test(is_admin)
 def admin_view(request):
-    
-    # Get statistics for admin dashboard
+    """Admin view - Only accessible to users with 'Admin' role."""
     total_books = Book.objects.count()
     total_libraries = Library.objects.count()
     total_users = UserProfile.objects.count()
     
-    # Get role distribution
     admin_count = UserProfile.objects.filter(role='Admin').count()
     librarian_count = UserProfile.objects.filter(role='Librarian').count()
     member_count = UserProfile.objects.filter(role='Member').count()
     
-    # Recent users (last 5)
     recent_users = UserProfile.objects.select_related('user').order_by('-date_joined_profile')[:5]
     
     context = {
@@ -141,12 +131,9 @@ def admin_view(request):
 
 @user_passes_test(is_librarian)
 def librarian_view(request):
-    
-    # Get library-specific data
+    """Librarian view - Only accessible to users with 'Librarian' role."""
     libraries = Library.objects.prefetch_related('books__author')
     books_without_library = Book.objects.filter(library__isnull=True)
-    
-    # Get recent additions (you might want to add date fields to your models)
     recent_books = Book.objects.select_related('author').order_by('-id')[:5]
     
     context = {
@@ -162,12 +149,10 @@ def librarian_view(request):
 
 @user_passes_test(is_member)
 def member_view(request):
-    
-    # Get data relevant to members
+    """Member view - Only accessible to users with 'Member' role."""
     all_books = Book.objects.select_related('author').order_by('title')
     all_libraries = Library.objects.prefetch_related('books')
     
-    # Get some random book recommendations (simple implementation)
     import random
     recommended_books = list(Book.objects.select_related('author'))
     if len(recommended_books) > 3:
@@ -184,11 +169,8 @@ def member_view(request):
     
     return render(request, 'relationship_app/member_view.html', context)
 
-
 def check_role(request):
-   
-    #Helper view to check current user's role.
-    
+    """Helper view to check current user's role."""
     if not request.user.is_authenticated:
         return render(request, 'relationship_app/role_check.html', {
             'message': 'You need to be logged in to check your role.',
@@ -210,3 +192,118 @@ def check_role(request):
         }
     
     return render(request, 'relationship_app/role_check.html', context)
+
+# ============================================
+# NEW: CUSTOM PERMISSION-PROTECTED VIEWS
+# ============================================
+
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def add_book(request):
+    """
+    View to add a new book. Requires 'can_add_book' permission.
+    Only users with this permission can create new books.
+    """
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        author_name = request.POST.get('author_name')
+        publication_year = request.POST.get('publication_year')
+        
+        if title and author_name:
+            # Get or create author
+            author, created = Author.objects.get_or_create(name=author_name)
+            
+            # Create book
+            book = Book.objects.create(
+                title=title,
+                author=author,
+                publication_year=int(publication_year) if publication_year else None
+            )
+            
+            messages.success(request, f'Book "{book.title}" by {author.name} has been added successfully!')
+            return redirect('relationship_app:list_books')
+        else:
+            messages.error(request, 'Please fill in all required fields (Title and Author).')
+    
+    # Get all authors for the dropdown
+    authors = Author.objects.all().order_by('name')
+    
+    context = {
+        'authors': authors,
+        'user_permissions': {
+            'can_add': request.user.has_perm('relationship_app.can_add_book'),
+            'can_change': request.user.has_perm('relationship_app.can_change_book'),
+            'can_delete': request.user.has_perm('relationship_app.can_delete_book'),
+        }
+    }
+    
+    return render(request, 'relationship_app/add_book.html', context)
+
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def edit_book(request, book_id):
+    """
+    View to edit an existing book. Requires 'can_change_book' permission.
+    Only users with this permission can modify books.
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        author_name = request.POST.get('author_name')
+        publication_year = request.POST.get('publication_year')
+        
+        if title and author_name:
+            # Get or create author
+            author, created = Author.objects.get_or_create(name=author_name)
+            
+            # Update book
+            book.title = title
+            book.author = author
+            book.publication_year = int(publication_year) if publication_year else None
+            book.save()
+            
+            messages.success(request, f'Book "{book.title}" has been updated successfully!')
+            return redirect('relationship_app:list_books')
+        else:
+            messages.error(request, 'Please fill in all required fields (Title and Author).')
+    
+    # Get all authors for the dropdown
+    authors = Author.objects.all().order_by('name')
+    
+    context = {
+        'book': book,
+        'authors': authors,
+        'user_permissions': {
+            'can_add': request.user.has_perm('relationship_app.can_add_book'),
+            'can_change': request.user.has_perm('relationship_app.can_change_book'),
+            'can_delete': request.user.has_perm('relationship_app.can_delete_book'),
+        }
+    }
+    
+    return render(request, 'relationship_app/edit_book.html', context)
+
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def delete_book(request, book_id):
+    """
+    View to delete a book. Requires 'can_delete_book' permission.
+    Only users with this permission can delete books.
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    if request.method == 'POST':
+        book_title = book.title
+        book_author = book.author.name
+        book.delete()
+        
+        messages.success(request, f'Book "{book_title}" by {book_author} has been deleted successfully!')
+        return redirect('relationship_app:list_books')
+    
+    context = {
+        'book': book,
+        'user_permissions': {
+            'can_add': request.user.has_perm('relationship_app.can_add_book'),
+            'can_change': request.user.has_perm('relationship_app.can_change_book'),
+            'can_delete': request.user.has_perm('relationship_app.can_delete_book'),
+        }
+    }
+    
+    return render(request, 'relationship_app/delete_book.html', context)
