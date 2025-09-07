@@ -22,8 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-(ad9fu8z$#uds3njxwjqqlfoaja2@o8t8y47o((5mp=o_r8k0@'
 
+# Make sure these are set for authentication
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/books/'  # Where to go after successful login
+LOGOUT_REDIRECT_URL = '/books/'  # Where to go after logout
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+STATIC_URL = '/static/'
 
 ALLOWED_HOSTS = []
 
@@ -40,17 +46,15 @@ INSTALLED_APPS = [
     'bookshelf',
     'relationship_app',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',    
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',               
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   
+    'django.contrib.messages.middleware.MessageMiddleware',     
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 ROOT_URLCONF = 'LibraryProject.urls'
 
 TEMPLATES = [
@@ -122,3 +126,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+

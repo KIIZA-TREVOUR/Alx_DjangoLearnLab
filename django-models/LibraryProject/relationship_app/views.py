@@ -1,6 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.http import HttpResponse
 from .models import Book
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView, LogoutView
+from django.urls import reverse_lazy
+from django.contrib import messages
 # Function-based view to list all books
 def list_books(request):
     """
@@ -63,3 +68,29 @@ def library_detail(request, pk):
     """
     library = get_object_or_404(Library, pk=pk)
     return render(request, 'relationship_app/library_detail.html', {'library': library})
+
+# Registration view
+def registerView(request):
+    """Function-based view for user registration."""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}!')
+            login(request, user)
+            return redirect('relationship_app:list_books')
+    else:
+        form = UserCreationForm()
+    return render(request, 'relationship_app/register.html', {'form': form})
+
+# Custom login view
+class CustomLoginView(LoginView):
+    """Custom login view using Django's built-in LoginView."""
+    template_name = 'relationship_app/login.html'
+    success_url = reverse_lazy('relationship_app:list_books')
+
+# Custom logout view
+class CustomLogoutView(LogoutView):
+    """Custom logout view using Django's built-in LogoutView."""
+    template_name = 'relationship_app/logout.html'
