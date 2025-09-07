@@ -2,8 +2,6 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.http import HttpResponse
 from .models import Book
-from .models import Library
-
 # Function-based view to list all books
 def list_books(request):
     """
@@ -27,6 +25,7 @@ def list_books_text(request):
     return HttpResponse("\n".join(book_list), content_type="text/plain")
 
 # Class-based view to display library details
+from .models import Library
 class LibraryDetailView(DetailView):
     """
     Class-based view that displays details for a specific library.
