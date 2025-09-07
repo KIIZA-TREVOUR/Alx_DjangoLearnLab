@@ -24,8 +24,8 @@ def list_books_text(request):
     return HttpResponse("\n".join(book_list), content_type="text/plain")
 
 # Class-based view to display library details
-from django.views.generic import DetailView
 from .models import Library
+from django.views.generic import DetailView
 class LibraryDetailView(DetailView):
     """
     Class-based view that displays details for a specific library.
