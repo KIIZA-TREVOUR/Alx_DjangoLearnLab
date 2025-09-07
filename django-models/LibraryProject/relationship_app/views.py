@@ -10,7 +10,6 @@ from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from .models import Book, Library, UserProfile, Author
-from django.contrib.auth.decorators import  permission_required
 
 # Keep all your existing views here...
 
@@ -194,10 +193,8 @@ def check_role(request):
     
     return render(request, 'relationship_app/role_check.html', context)
 
-# ============================================
-# NEW: CUSTOM PERMISSION-PROTECTED VIEWS
-# ============================================
 
+from django.contrib.auth.decorators import  permission_required
 @permission_required('relationship_app.can_add_book', raise_exception=True)
 def add_book(request):
     """
