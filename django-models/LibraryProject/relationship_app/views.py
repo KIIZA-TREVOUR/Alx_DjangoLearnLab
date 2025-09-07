@@ -3,13 +3,14 @@ from django.http import HttpResponse
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.decorators import user_passes_test, permission_required
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from .models import Book, Library, UserProfile, Author
+from django.contrib.auth.decorators import  permission_required
 
 # Keep all your existing views here...
 
