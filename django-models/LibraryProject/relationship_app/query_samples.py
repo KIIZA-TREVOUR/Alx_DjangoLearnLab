@@ -4,15 +4,9 @@ from relationship_app.models import Author, Book, Library, Librarian
 def get_books_by_author(author_name):
     try:
         author = Author.objects.get(name=author_name)
-
-        # Version 1 (explicit filter) – required for checker
-        books_v1 = Book.objects.filter(author=author)
-
-        # Version 2 (related_name) – also required for checker
-        books_v2 = author.books.all()
-
-        # Return from either (both are same logically)
-        return [book.title for book in books_v1]
+        books = author.books.all()
+        
+        return [book.title for book in books]
     except Author.DoesNotExist:
         return f"No author named {author_name} found."
 
@@ -21,14 +15,8 @@ def get_books_by_author(author_name):
 def get_books_in_library(library_name):
     try:
         library = Library.objects.get(name=library_name)
-
-        # Version 1 (explicit filter)
-        books_v1 = Book.objects.filter(libraries=library)
-
-        # Version 2 (ManyToMany direct access)
-        books_v2 = library.books.all()
-
-        return [book.title for book in books_v1]
+        books = Book.objects.filter(libraries=library)
+        return [book.title for book in books]
     except Library.DoesNotExist:
         return f"No library named {library_name} found."
 
