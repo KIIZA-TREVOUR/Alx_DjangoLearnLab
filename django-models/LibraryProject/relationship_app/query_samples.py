@@ -1,31 +1,16 @@
 from django.db import models
 from relationship_app.models import Author, Book, Library, Librarian
-
 # Query 1: All books by a specific author
 def get_books_by_author(author_name):
-    try:
-        author = Author.objects.get(name=author_name)
-        books = author.books.all()  # Uses related_name 'books'
-        return [book.title for book in books]
-    except Author.DoesNotExist:
-        return f"No author named {author_name} found."
+    books = Book.objects.filter(author__name=author_name)
+    return [book.title for book in books]
 
 # Query 2: All books in a library
 def get_books_in_library(library_name):
-    try:
-        library = Library.objects.get(name=library_name)
-        books = library.books.all()  # Uses ManyToManyField
-        return [book.title for book in books]
-    except Library.DoesNotExist:
-        return f"No library named {library_name} found."
+    books = Book.objects.filter(libraries__name=library_name)
+    return [book.title for book in books]
 
-# Query 3: The librarian for a library
+# Query 3: Retrieve the librarian for a library
 def get_librarian_for_library(library_name):
-    try:
-        library = Library.objects.get(name=library_name)
-        librarian = library.librarian  # Uses related_name 'librarian'
-        return librarian.name
-    except Library.DoesNotExist:
-        return f"No library named {library_name} found."
-    except Librarian.DoesNotExist:
-        return f"No librarian assigned to {library_name}."
+    librarian = Librarian.objects.filter(library__name=library_name).first()
+    return librarian.name if librarian else f"No librarian found for {library_name}"
