@@ -1,0 +1,91 @@
+<!-- library_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Libraries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .library-card {
+            background-color: #f8f9fa;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .library-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .library-books {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .view-details {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .view-details:hover {
+            background-color: #0056b3;
+        }
+        .no-libraries {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .navigation {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        .navigation a {
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Libraries</h1>
+    
+    {% if libraries %}
+        <p>Total libraries: {{ libraries|length }}</p>
+        
+        {% for library in libraries %}
+            <div class="library-card">
+                <div class="library-name">{{ library.name }}</div>
+                <div class="library-books">
+                    Books available: {{ library.books.count }}
+                </div>
+                <a href="{% url 'relationship_app:library_detail' library.pk %}" class="view-details">
+                    View Details
+                </a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-libraries">No libraries available in the database.</p>
+    {% endif %}
+    
+    <div class="navigation">
+        <a href="{% url 'relationship_app:list_books' %}">View All Books</a>
+    </div>
+</body>
+</html>
