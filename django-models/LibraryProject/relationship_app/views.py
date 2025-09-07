@@ -112,10 +112,7 @@ def is_member(user):
 
 @user_passes_test(is_admin)
 def admin_view(request):
-    """
-    Admin view - Only accessible to users with 'Admin' role.
-    Provides administrative functionality and statistics.
-    """
+    
     # Get statistics for admin dashboard
     total_books = Book.objects.count()
     total_libraries = Library.objects.count()
@@ -144,10 +141,7 @@ def admin_view(request):
 
 @user_passes_test(is_librarian)
 def librarian_view(request):
-    """
-    Librarian view - Only accessible to users with 'Librarian' role.
-    Provides library management functionality.
-    """
+    
     # Get library-specific data
     libraries = Library.objects.prefetch_related('books__author')
     books_without_library = Book.objects.filter(library__isnull=True)
@@ -168,10 +162,7 @@ def librarian_view(request):
 
 @user_passes_test(is_member)
 def member_view(request):
-    """
-    Member view - Only accessible to users with 'Member' role.
-    Provides member-specific functionality like browsing and recommendations.
-    """
+    
     # Get data relevant to members
     all_books = Book.objects.select_related('author').order_by('title')
     all_libraries = Library.objects.prefetch_related('books')
@@ -193,15 +184,11 @@ def member_view(request):
     
     return render(request, 'relationship_app/member_view.html', context)
 
-# ============================================
-# OPTIONAL: Role checking view for testing
-# ============================================
 
 def check_role(request):
-    """
-    Helper view to check current user's role.
-    Useful for testing and debugging role assignments.
-    """
+   
+    #Helper view to check current user's role.
+    
     if not request.user.is_authenticated:
         return render(request, 'relationship_app/role_check.html', {
             'message': 'You need to be logged in to check your role.',
