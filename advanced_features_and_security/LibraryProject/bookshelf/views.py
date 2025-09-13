@@ -2,7 +2,64 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.contrib import messages
+from .models import Book
 from .models import Article
+
+@login_required
+@permission_required('bookshelf.view_customuser', raise_exception=True)  # can adjust to your permission
+def book_list(request):
+    """View to list all books - requires view permission"""
+    books = Book.objects.all()
+    return render(request, 'bookshelf/book_list.html', {'books': books})
+
+@login_required
+@permission_required('bookshelf.view_customuser', raise_exception=True)
+def book_detail(request, pk):
+    """Display details of a single book"""
+    book = get_object_or_404(Book, pk=pk)
+    return render(request, 'bookshelf/book_detail.html', {'book': book})
+
+@login_required
+@permission_required('bookshelf.can_create', raise_exception=True)
+def book_create(request):
+    """Create a new book - requires can_create permission"""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        author = request.POST.get('author')
+        publication_year = request.POST.get('publication_year')
+        Book.objects.create(
+            title=title,
+            author=author,
+            publication_year=publication_year
+        )
+        messages.success(request, 'Book created successfully!')
+        return redirect('book_list')
+    return render(request, 'bookshelf/book_create.html')
+
+@login_required
+@permission_required('bookshelf.can_change', raise_exception=True)
+def book_edit(request, pk):
+    """Edit an existing book - requires can_change permission"""
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.title = request.POST.get('title', book.title)
+        book.author = request.POST.get('author', book.author)
+        book.publication_year = request.POST.get('publication_year', book.publication_year)
+        book.save()
+        messages.success(request, 'Book updated successfully!')
+        return redirect('book_detail', pk=book.pk)
+    return render(request, 'bookshelf/book_edit.html', {'book': book})
+
+@login_required
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def book_delete(request, pk):
+    """Delete a book - requires can_delete permission"""
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        messages.success(request, 'Book deleted successfully!')
+        return redirect('book_list')
+    return render(request, 'bookshelf/book_delete.html', {'book': book})
 
 @login_required
 @permission_required('app_name.can_view', raise_exception=True)
