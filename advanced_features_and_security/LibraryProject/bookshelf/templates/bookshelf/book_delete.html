@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>Delete Book</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .confirmation { border: 1px solid #dc3545; padding: 20px; border-radius: 5px; background: #f8d7da; }
+        .btn-danger { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-cancel { padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Delete Book</h1>
+
+    <div class="confirmation">
+        <p>Are you sure you want to delete "<strong>{{ book.title|escape }}</strong>" by {{ book.author|escape }}?</p>
+        <p><strong>This action cannot be undone.</strong></p>
+
+        <form method="post" action="{% url 'book_delete' book.pk %}" style="display: inline;">
+            <!-- Security: CSRF token protection -->
+            {% csrf_token %}
+            
+            <button type="submit" class="btn-danger">Yes, Delete</button>
+        </form>
+        <a href="{% url 'book_detail' book.pk %}" class="btn-cancel">Cancel</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>{{ book.title|escape }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .book-details { border: 1px solid #ccc; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .book-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .book-info { margin-bottom: 10px; }
+        .actions { margin-top: 20px; }
+        .btn { padding: 8px 15px; margin-right: 10px; text-decoration: none; border-radius: 3px; }
+        .btn-edit { background: #007cba; color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-back { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Book Details</h1>
+    
+    <div class="book-details">
+        <div class="book-title">{{ book.title|escape }}</div>
+        <div class="book-info"><strong>Author:</strong> {{ book.author|escape }}</div>
+        <div class="book-info"><strong>Publication Year:</strong> {{ book.publication_year }}</div>
+    </div>
+    
+    <div class="actions">
+        <a href="{% url 'book_edit' book.pk %}" class="btn btn-edit">Edit</a>
+        <a href="{% url 'book_delete' book.pk %}" class="btn btn-delete">Delete</a>
+        <a href="{% url 'book_list' %}" class="btn btn-back">Back to List</a>
+    </div>
+</body>
+</html>

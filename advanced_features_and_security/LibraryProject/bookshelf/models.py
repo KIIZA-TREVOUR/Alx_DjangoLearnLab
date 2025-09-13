@@ -127,12 +127,41 @@ class CustomUser(AbstractUser):
 
 
 # -------------------------
-# Optional Book model
+# Book model with security permissions
 # -------------------------
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100)
     publication_year = models.IntegerField()
 
+    class Meta:
+        permissions = [
+            ('can_create', 'Can create books'),
+            ('can_edit', 'Can edit books'),
+            ('can_delete', 'Can delete books'),
+        ]
+
     def __str__(self):
         return f"{self.title} by {self.author}"
+
+
+# -------------------------
+# Article model with security permissions
+# -------------------------
+class Article(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        permissions = [
+            ('can_view', 'Can view articles'),
+            ('can_create', 'Can create articles'),
+            ('can_edit', 'Can edit articles'),
+            ('can_delete', 'Can delete articles'),
+        ]
+    
+    def __str__(self):
+        return self.title

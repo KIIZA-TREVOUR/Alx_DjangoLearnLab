@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>Edit Book</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"] { 
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; 
+        }
+        button { padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .messages { margin-bottom: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Edit Book</h1>
+
+    <!-- Display Django messages with XSS protection -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message|escape }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'book_edit' book.pk %}">
+        <!-- Security: CSRF token protection -->
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required maxlength="200" 
+                   value="{{ book.title|escape }}" pattern="[a-zA-Z0-9\s\-_.,!?]+">
+        </div>
+        
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" required maxlength="100"
+                   value="{{ book.author|escape }}" pattern="[a-zA-Z\s\-.]+">
+        </div>
+        
+        <div class="form-group">
+            <label for="publication_year">Publication Year:</label>
+            <input type="number" id="publication_year" name="publication_year" 
+                   required min="1000" max="2024" value="{{ book.publication_year }}">
+        </div>
+        
+        <button type="submit">Update Book</button>
+        <a href="{% url 'book_detail' book.pk %}">Cancel</a>
+    </form>
+</body>
+</html>
