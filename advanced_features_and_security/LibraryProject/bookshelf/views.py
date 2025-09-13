@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.db import transaction
 from .models import Book, Article
-from .forms import BookForm, ArticleForm, ExampleForm
+from .forms import BookForm, ArticleForm
+from .forms import ExampleForm
 
 # BOOK VIEWS - Secure implementation with Django forms and proper permission checks
 
