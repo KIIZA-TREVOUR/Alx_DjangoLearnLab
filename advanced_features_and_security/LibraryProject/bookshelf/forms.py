@@ -149,7 +149,7 @@ class ArticleForm(forms.ModelForm):
         
         return content
 
-class ExampleSecureForm(forms.Form):
+class ExampleForm(forms.Form):
     """
     Example form demonstrating Django security best practices
     """
