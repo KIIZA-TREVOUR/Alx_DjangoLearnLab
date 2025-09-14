@@ -141,6 +141,8 @@ X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 DEBUG = False
+# Configure proxy SSL header for reverse proxy setups
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # HTTPS Configuration
 # Redirect all HTTP requests to HTTPS
