@@ -144,3 +144,34 @@ X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 DEBUG = False
+
+
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS)
+# Force browsers to use HTTPS for 1 year (31536000 seconds)
+SECURE_HSTS_SECONDS = 31536000
+
+# Include all subdomains in HSTS policy
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Allow HSTS preloading (browsers can preload HSTS policy)
+SECURE_HSTS_PRELOAD = True
+
+# Secure Cookie Settings
+# Only send session cookies over HTTPS
+SESSION_COOKIE_SECURE = True
+
+# Only send CSRF cookies over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Security Headers
+# Prevent site from being displayed in frames (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'
+
+# Prevent MIME type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable browser XSS filtering
+SECURE_BROWSER_XSS_FILTER = True
