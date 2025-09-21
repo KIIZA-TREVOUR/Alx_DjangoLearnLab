@@ -1,24 +1,18 @@
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser
 from .models import Book
 from .serializers import BookSerializer
+from .permissions import IsStaffOrReadOnly, IsAuthorOrReadOnly
+
 
 class BookList(generics.ListAPIView):
-    """
-    API view to retrieve a list of all books.
-    
-    This view extends ListAPIView which provides GET method handler
-    for listing a queryset.
-    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        """
-        Optionally restricts the returned books to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
         queryset = Book.objects.all()
         
         # Optional: Add filtering capabilities
@@ -40,16 +34,22 @@ class BookViewSet(viewsets.ModelViewSet):
     This ViewSet automatically provides `list`, `create`, `retrieve`,
     `update` and `destroy` actions.
     
+    Authentication: Token authentication required
+    Permissions: 
+    - Read: Any authenticated user
+    - Write: Staff users only
+    
     Available endpoints:
-    - GET /books_all/ - List all books
-    - POST /books_all/ - Create a new book
-    - GET /books_all/{id}/ - Retrieve a specific book
-    - PUT /books_all/{id}/ - Update a specific book (full update)
-    - PATCH /books_all/{id}/ - Partial update a specific book
-    - DELETE /books_all/{id}/ - Delete a specific book
+    - GET /books_all/ - List all books (authenticated users)
+    - POST /books_all/ - Create a new book (staff only)
+    - GET /books_all/{id}/ - Retrieve a specific book (authenticated users)
+    - PUT /books_all/{id}/ - Update a specific book (staff only)
+    - PATCH /books_all/{id}/ - Partial update a specific book (staff only)
+    - DELETE /books_all/{id}/ - Delete a specific book (staff only)
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsStaffOrReadOnly]  # Staff can write, authenticated users can read
     
     def get_queryset(self):
         queryset = Book.objects.all()
@@ -70,6 +70,19 @@ class BookViewSet(viewsets.ModelViewSet):
             
         return queryset.order_by('title')
     
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            # Read-only actions: require authentication only
+            permission_classes = [IsAuthenticated]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+            # Write actions: require staff permissions
+            permission_classes = [IsAuthenticated, IsAdminUser]
+        else:
+            # Default to staff permissions for custom actions
+            permission_classes = [IsStaffOrReadOnly]
+        
+        return [permission() for permission in permission_classes]
+    
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -79,16 +92,14 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 'message': 'Book created successfully',
-                'book': serializer.data
+                'book': serializer.data,
+                'created_by': request.user.username
             },
             status=status.HTTP_201_CREATED,
             headers=headers
         )
     
     def update(self, request, *args, **kwargs):
-        """
-        Update a book with custom response.
-        """
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -97,7 +108,8 @@ class BookViewSet(viewsets.ModelViewSet):
         
         return Response({
             'message': 'Book updated successfully',
-            'book': serializer.data
+            'book': serializer.data,
+            'updated_by': request.user.username
         })
     
     def destroy(self, request, *args, **kwargs):
@@ -106,10 +118,11 @@ class BookViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         
         return Response({
-            'message': f'Book "{book_title}" deleted successfully'
+            'message': f'Book "{book_title}" deleted successfully',
+            'deleted_by': request.user.username
         }, status=status.HTTP_204_NO_CONTENT)
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def by_author(self, request):
         author = request.query_params.get('author', None)
         if not author:
@@ -124,22 +137,40 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response({
             'author': author,
             'count': books.count(),
-            'books': serializer.data
+            'books': serializer.data,
+            'requested_by': request.user.username
         })
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def mark_favorite(self, request, pk=None):
         book = self.get_object()
-        # In a real application, you might have a user favorite system
         return Response({
             'message': f'"{book.title}" marked as favorite',
-            'book_id': book.id
+            'book_id': book.id,
+            'marked_by': request.user.username
         })
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAdminUser])
+    def admin_stats(self, request):
+        total_books = self.queryset.count()
+        authors = self.queryset.values_list('author', flat=True).distinct()
+        
+        return Response({
+            'total_books': total_books,
+            'total_authors': len(authors),
+            'authors': list(authors),
+            'requested_by': request.user.username
+        })
+
+
 class BookListCreateView(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
 
 class BookDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsStaffOrReadOnly]
     lookup_field = 'pk'
