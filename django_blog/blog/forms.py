@@ -15,3 +15,11 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+    
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email')
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
