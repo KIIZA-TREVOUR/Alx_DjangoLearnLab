@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Post, Comment
-from taggit.forms import TagWidget  # ← ADD THIS IMPORT
+from taggit.forms import TagWidget
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -25,7 +25,7 @@ class PostForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
-            'tags': TagWidget(attrs={'class': 'form-control', 'placeholder': 'django, python, blog'}),  # ← USE TagWidget HERE
+            'tags': TagWidget(),
         }
 
 class CommentForm(forms.ModelForm):
