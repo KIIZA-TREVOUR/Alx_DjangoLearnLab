@@ -11,5 +11,41 @@
         <a href="{% url 'post-delete' post.pk %}">Delete</a>
     </p>
 {% endif %}
+
+<!-- Comments Section -->
+<h3>Comments ({{ post.comments.count }})</h3>
+
+<!-- Add Comment Form (for logged-in users) -->
+{% if user.is_authenticated %}
+<div class="comment-form">
+    <h4>Add a Comment</h4>
+    <form method="post" action="{% url 'comment-create' post.pk %}">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <button type="submit" class="btn btn-primary mt-2">Post Comment</button>
+    </form>
+</div>
+{% else %}
+<p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
+{% endif %}
+
+<!-- Display Comments -->
+<div class="comments">
+    {% for comment in post.comments.all %}
+    <div class="comment">
+        <p>{{ comment.content }}</p>
+        <small>
+            By {{ comment.author }} on {{ comment.created_at|date:"M d, Y" }}
+            {% if user == comment.author %}
+                | <a href="{% url 'comment-update' comment.pk %}">Edit</a>
+                | <a href="{% url 'comment-delete' comment.pk %}">Delete</a>
+            {% endif %}
+        </small>
+    </div>
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+</div>
+
 <a href="{% url 'posts' %}">← Back to Posts</a>
 {% endblock %}
