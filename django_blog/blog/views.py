@@ -8,15 +8,15 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Log in immediately after registration
+            login(request, user) 
             return redirect('profile')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'blog/register.html', {'form': form})
 
 @login_required
 def profile(request):
-    return render(request, 'registration/profile.html')
+    return render(request, 'blog/profile.html')
 
 @login_required
 def edit_profile(request): 
@@ -27,4 +27,4 @@ def edit_profile(request):
             return redirect('profile')
     else:
         form = ProfileEditForm(instance=request.user)
-    return render(request, 'registration/edit_profile.html', {'form': form})
+    return render(request, 'blog/edit_profile.html', {'form': form})
